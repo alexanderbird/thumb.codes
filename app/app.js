@@ -5,21 +5,36 @@ function render(element, component, props) {
 }
 
 class App {
-  render({ result, maxResults, query }) {
-    const topResult = result[0];
+  constructor({ emoji }) {
+    this.emoji = emoji;
+    this.results = { '': emoji };
+  }
+
+  render({ maxResults, query }) {
+    const results = this._getResultsForQueryAndUpdateCache(query);
+    const topResult = results[0];
     if (topResult) {
       return `
         <div class='top-result'>
-          <h2 class='top-result__result'>${result[0].emoji} ${result[0].description}</h2>
+          <h2 class='top-result__result'>${topResult.emoji} ${topResult.description}</h2>
           <div class='top-result__instructions'>(Enter/Submit to copy)</div>
         </div>
 
-        ${result.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
-        ${result.length > (1 + maxResults) ? `<div>(and ${result.length - 1 - maxResults} more)</div>` : ''}
+        ${results.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
+        ${results.length > (1 + maxResults) ? `<div>(and ${results.length - 1 - maxResults} more)</div>` : ''}
       `;
     } else {
       return `No results for ${query}`;
     }
+  }
+
+  _getResultsForQueryAndUpdateCache(query) {
+    const bestGuess = this.results[query.slice(0,-1)] || this.emoji;
+    const queryTerms = query.toLowerCase().split(' ');
+    const filteredResults = this.results[query]
+      || bestGuess.filter(({ description }) => queryTerms.every(term => description.toLowerCase().match(term)));
+    this.results[query] = filteredResults;
+    return filteredResults
   }
 }
 
@@ -36,19 +51,13 @@ async function main() {
   const searchInput = document.querySelector('#search');
   const searchForm = document.querySelector('#search_form');
   const resultElement = document.querySelector('#results');
-  const results = { '': emoji };
-  const app = new App();
+  const app = new App({ emoji });
 
   function onSearchKeyup() {
-    const query = preProcessQuery(searchInput);
-
-    const bestGuess = results[query.slice(0,-1)] || emoji;
-
-    const queryTerms = query.toLowerCase().split(' ');
-    const result = results[query] || bestGuess.filter(x => queryTerms.every(term => x.description.toLowerCase().match(term)));
-    results[query] = result;
-
-    render(resultElement, app, { result, maxResults: 50, query });
+    render(resultElement, app, {
+      maxResults: 50,
+      query: preProcessQuery(searchInput)
+    });
   }
 
   function onSubmit() {
