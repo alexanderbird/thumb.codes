@@ -2,6 +2,12 @@
 
 Emoji clipboard: from search term to clipboard without using your mouse
 
+## Why
+
+The alternatives I've found (emojipedia, amp-what.com, and other unicode/emoji
+searches) are optimized for discovery. I wanted one optimized for putting the
+emoji on my clipboard ASAP, and I wanted a quick+fun side project.
+
 ## Contributing
 
 PRs welcome, as long as you don't make it any more keystrokes to get an emoji
