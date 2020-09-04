@@ -10,7 +10,7 @@ async function main() {
   let topResult = false;
 
   function onSearchKeyup() {
-    const query = searchInput.value.length <= 1 ? '' : searchInput.value;
+    const query = searchInput.value.length <= 1 ? '' : searchInput.value.replace(/ /g, '.*');
 
     const bestGuess = results[query.slice(0,-1)] || emoji;
 
