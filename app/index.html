@@ -10,11 +10,34 @@
         text-align: center;
       }
 
+      #results > *:not(:nth-of-type(-n+10)) {
+        opacity: 0.6;
+      }
+
       #search {
         margin: 20px;
         font-size: 2rem;
         text-align: center;
       }
+
+      .top-result {
+        margin-bottom: 20px;
+        background-color: #99999988;
+        border-radius: 0.25rem;
+      }
+
+      .top-result > * {
+        width: auto;
+      }
+
+      .top-result__result {
+        margin-bottom: 0;
+      }
+
+      .top-result__instructions {
+        opacity: 0.8;
+      }
+
     </style>
   </head>
   <body>
