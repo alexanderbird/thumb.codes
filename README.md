@@ -4,6 +4,10 @@ Lightweight emoji keyboard web app
 
 ## Developer Notes
 
+### Running locally
+
+    npm run watch
+
 ### Updating the emoji list
 
 Manually find the unicode emoji test document, e.g. https://unicode.org/Public/emoji/13.0/emoji-test.txt
