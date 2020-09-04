@@ -3,17 +3,27 @@ const emojiPromise = fetch('/emoji.json').then(r => r.json());
 async function main() {
   const emoji = await emojiPromise;
   const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
-  const [ getState, setState ] = useState({ topResult: false, emoji });
+  const [ getState, setState ] = useState({ topResult: false, emoji, offset: 0 });
   const app = new App(getState, setState);
   boundOnSearchKeyup = onSearchKeyup.bind(null, resultElement, app, searchInput);
   boundOnSearchKeyup();
+  const moveDown = () => setState({ offset: getState().offset + 1 })
+  const moveUp = () => setState({ offset: getState().offset - 1 })
+  searchInput.addEventListener('keyup', onArrowKeys.bind(null, moveDown, moveUp));
   searchInput.addEventListener('keyup', boundOnSearchKeyup);
   searchForm.addEventListener('submit', onSubmit.bind(null, getState, bannerElement));
 }
 
 document.addEventListener('DOMContentLoaded', main);
 
-function onSearchKeyup(resultElement, app, searchInput) {
+function onArrowKeys(moveDown, moveUp, { key, preventDefault }) {
+  switch (key) {
+    case 'ArrowDown': return moveDown();
+    case 'ArrowUp': return moveUp();
+  }
+}
+
+function onSearchKeyup(resultElement, app, searchInput, event = {}) {
   render(resultElement, app, {
     maxResults: 50,
     query: preProcessQuery(searchInput)
@@ -52,7 +62,7 @@ class App {
 
   render({ maxResults, query }) {
     const results = this._getResultsForQueryAndUpdateCache(query);
-    const topResult = results[0];
+    const { topResult, rest } = this._getResultParts(results);
     this.setState({ topResult });
     if (topResult) {
       return `
@@ -61,12 +71,22 @@ class App {
           <div class='top-result__instructions'>(Enter/Submit to copy)</div>
         </div>
 
-        ${results.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
-        ${results.length > (1 + maxResults) ? `<div>(and ${results.length - 1 - maxResults} more)</div>` : ''}
+        ${rest.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
+        ${rest.length > (1 + maxResults) ? `<div>(and ${rest.length - 1 - maxResults} more)</div>` : ''}
       `;
     } else {
       return `No results for ${query}`;
     }
+  }
+
+  _getResultParts(results) {
+    const { offset } = this.getState();
+    const index = offset % results.length;
+    const topResult = results[index];
+    const before = index > 0 ? results.slice(0, index) : [];
+    const after = results.slice(index + 1, -1);
+    const spacer = { emoji: '&nbsp;', description: '&nbsp;' };
+    return { topResult, rest: [...after, spacer, ...before] };
   }
 
   _getResultsForQueryAndUpdateCache(query) {
