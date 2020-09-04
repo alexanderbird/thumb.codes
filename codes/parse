@@ -1,0 +1,8 @@
+#!/bin/sh
+
+readonly strip_comments="/^\s*#/d"
+readonly line_pattern=".*# \([^E ]*\) *E[0-9]*\.[0-9]* *\(.*\)"
+readonly object_template="{ \"emoji\": \"\1\", \"description\": \"\2\" }"
+readonly transform="s/$line_pattern/$object_template/"
+
+sed "$strip_comments;$transform"

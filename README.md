@@ -10,6 +10,6 @@ Manually find the unicode emoji test document, e.g. https://unicode.org/Public/e
 
 Download save it in ./codes/source.txt
 
-Then re-run `npm run build-codes`
+Then re-run `npm run build`
 
 

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+codes/parse | codes/to-json
