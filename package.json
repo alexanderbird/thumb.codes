@@ -1,0 +1,12 @@
+{
+  "name": "thumb.codes",
+  "version": "1.0.0",
+  "description": "Lightweight emoji keyboard web app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-codes": "wc -l < codes/source.txt"
+  },
+  "author": "Alexander Bird",
+  "license": "UNLICENSED"
+}
