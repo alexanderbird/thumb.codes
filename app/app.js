@@ -5,7 +5,8 @@ function render(element, component, props) {
 }
 
 class App {
-  render({ topResult, result, maxResults, query }) {
+  render({ result, maxResults, query }) {
+    const topResult = result[0];
     if (topResult) {
       return `
         <div class='top-result'>
@@ -36,7 +37,7 @@ async function main() {
   const searchForm = document.querySelector('#search_form');
   const resultElement = document.querySelector('#results');
   const results = { '': emoji };
-  let topResult = false;
+  const app = new App();
 
   function onSearchKeyup() {
     const query = preProcessQuery(searchInput);
@@ -46,13 +47,8 @@ async function main() {
     const queryTerms = query.toLowerCase().split(' ');
     const result = results[query] || bestGuess.filter(x => queryTerms.every(term => x.description.toLowerCase().match(term)));
     results[query] = result;
-    topResult = result[0];
 
-    const maxResults = 50;
-
-    const app = new App();
-
-    render(resultElement, app, { topResult, result, maxResults, query });
+    render(resultElement, app, { result, maxResults: 50, query });
   }
 
   function onSubmit() {
