@@ -1,7 +1,45 @@
 const emojiPromise = fetch('/emoji.json').then(r => r.json());
 
-function render(element, component, props) {
-  element.innerHTML = component.render(props);
+async function main() {
+  const emoji = await emojiPromise;
+  const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
+  const [ getState, setState ] = useState({ topResult: false, emoji });
+  const app = new App(getState, setState);
+  boundOnSearchKeyup = onSearchKeyup.bind(null, resultElement, app, searchInput);
+  boundOnSearchKeyup();
+  searchInput.addEventListener('keyup', boundOnSearchKeyup);
+  searchForm.addEventListener('submit', onSubmit.bind(null, getState, bannerElement));
+}
+
+document.addEventListener('DOMContentLoaded', main);
+
+function onSearchKeyup(resultElement, app, searchInput) {
+  render(resultElement, app, {
+    maxResults: 50,
+    query: preProcessQuery(searchInput)
+  });
+}
+
+function onSubmit(getState, bannerElement) {
+  const { topResult } = getState();
+  if (!topResult) return;
+  navigator.clipboard.writeText(topResult.emoji);
+  bannerElement.innerHTML = `Copied '${topResult.emoji}' to the clipboard`;
+}
+
+function preProcessQuery(searchInput) {
+  const defaultQuery = searchInput.getAttribute('placeholder');
+  return searchInput.value.length > 0
+    ? searchInput.value.trim()
+    : defaultQuery;
+}
+
+function getElements(document) {
+  const bannerElement = document.querySelector('#banner');
+  const searchInput = document.querySelector('#search');
+  const searchForm = document.querySelector('#search_form');
+  const resultElement = document.querySelector('#results');
+  return { bannerElement, searchInput, searchForm, resultElement };
 }
 
 class App {
@@ -42,19 +80,10 @@ class App {
   }
 }
 
-function preProcessQuery(searchInput) {
-  const defaultQuery = searchInput.getAttribute('placeholder');
-  return searchInput.value.length > 0
-    ? searchInput.value.trim()
-    : defaultQuery;
-}
+/** rudimentary "Framework" */
 
-function getElements(document) {
-  const bannerElement = document.querySelector('#banner');
-  const searchInput = document.querySelector('#search');
-  const searchForm = document.querySelector('#search_form');
-  const resultElement = document.querySelector('#results');
-  return { bannerElement, searchInput, searchForm, resultElement };
+function render(element, component, props) {
+  element.innerHTML = component.render(props);
 }
 
 function useState(initialState) {
@@ -67,32 +96,4 @@ function useState(initialState) {
   }
   return [ getState, setState ];
 }
-
-async function main() {
-  const emoji = await emojiPromise;
-  const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
-
-  const [ getState, setState ] = useState({ topResult: false, emoji });
-  const app = new App(getState, setState);
-
-  function onSearchKeyup() {
-    render(resultElement, app, {
-      maxResults: 50,
-      query: preProcessQuery(searchInput)
-    });
-  }
-
-  function onSubmit() {
-    const { topResult } = getState();
-    if (!topResult) return;
-    navigator.clipboard.writeText(topResult.emoji);
-    bannerElement.innerHTML = `Copied '${topResult.emoji}' to the clipboard`;
-  }
-
-  onSearchKeyup();
-  searchInput.addEventListener('keyup', onSearchKeyup);
-  searchForm.addEventListener('submit', onSubmit);
-}
-
-document.addEventListener('DOMContentLoaded', main);
 
