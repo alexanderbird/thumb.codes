@@ -1,5 +1,27 @@
 const emojiPromise = fetch('/emoji.json').then(r => r.json());
 
+function render(element, component, props) {
+  element.innerHTML = component.render(props);
+}
+
+class App {
+  render({ topResult, result, maxResults, query }) {
+    if (topResult) {
+      return `
+        <div class='top-result'>
+          <h2 class='top-result__result'>${result[0].emoji} ${result[0].description}</h2>
+          <div class='top-result__instructions'>(Enter/Submit to copy)</div>
+        </div>
+
+        ${result.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
+        ${result.length > (1 + maxResults) ? `<div>(and ${result.length - 1 - maxResults} more)</div>` : ''}
+      `;
+    } else {
+      return `No results for ${query}`;
+    }
+  }
+}
+
 async function main() {
   const emoji = await emojiPromise;
   const bannerElement = document.querySelector('#banner');
@@ -22,19 +44,9 @@ async function main() {
 
     const maxResults = 50;
 
-    if (topResult) {
-      resultElement.innerHTML = `
-        <div class='top-result'>
-          <h2 class='top-result__result'>${result[0].emoji} ${result[0].description}</h2>
-          <div class='top-result__instructions'>(Enter/Submit to copy)</div>
-        </div>
+    const app = new App();
 
-        ${result.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
-        ${result.length > (1 + maxResults) ? `<div>(and ${result.length - 1 - maxResults} more)</div>` : ''}
-      `;
-    } else {
-      resultElement.innerHTML = `No results for ${query}`;
-    }
+    render(resultElement, app, { topResult, result, maxResults, query });
   }
 
   function onSubmit() {
