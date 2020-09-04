@@ -10,7 +10,7 @@ async function main() {
   let topResult = false;
 
   function onSearchKeyup() {
-    const defaultQuery = 'thumbs';
+    const defaultQuery = searchInput.getAttribute('placeholder');
     const query = searchInput.value.length > 0 ? searchInput.value.trim() : defaultQuery;
 
     const bestGuess = results[query.slice(0,-1)] || emoji;
