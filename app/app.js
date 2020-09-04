@@ -22,6 +22,13 @@ class App {
   }
 }
 
+function preProcessQuery(searchInput) {
+  const defaultQuery = searchInput.getAttribute('placeholder');
+  return searchInput.value.length > 0
+    ? searchInput.value.trim()
+    : defaultQuery;
+}
+
 async function main() {
   const emoji = await emojiPromise;
   const bannerElement = document.querySelector('#banner');
@@ -32,8 +39,7 @@ async function main() {
   let topResult = false;
 
   function onSearchKeyup() {
-    const defaultQuery = searchInput.getAttribute('placeholder');
-    const query = searchInput.value.length > 0 ? searchInput.value.trim() : defaultQuery;
+    const query = preProcessQuery(searchInput);
 
     const bestGuess = results[query.slice(0,-1)] || emoji;
 
