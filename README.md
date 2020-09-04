@@ -1,6 +1,6 @@
 # Thumb Codes
 
-Lightweight emoji keyboard web app
+Emoji clipboard: from search term to clipboard without using your mouse
 
 ## Developer Notes
 
