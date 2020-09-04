@@ -5,14 +5,17 @@ function render(element, component, props) {
 }
 
 class App {
-  constructor({ emoji }) {
-    this.emoji = emoji;
+  constructor(getState, setState) {
+    const { emoji } = getState();
+    this.getState = getState;
+    this.setState = setState;
     this.results = { '': emoji };
   }
 
   render({ maxResults, query }) {
     const results = this._getResultsForQueryAndUpdateCache(query);
     const topResult = results[0];
+    this.setState({ topResult });
     if (topResult) {
       return `
         <div class='top-result'>
@@ -29,7 +32,8 @@ class App {
   }
 
   _getResultsForQueryAndUpdateCache(query) {
-    const bestGuess = this.results[query.slice(0,-1)] || this.emoji;
+    const { emoji } = this.getState();
+    const bestGuess = this.results[query.slice(0,-1)] || emoji;
     const queryTerms = query.toLowerCase().split(' ');
     const filteredResults = this.results[query]
       || bestGuess.filter(({ description }) => queryTerms.every(term => description.toLowerCase().match(term)));
@@ -45,13 +49,31 @@ function preProcessQuery(searchInput) {
     : defaultQuery;
 }
 
-async function main() {
-  const emoji = await emojiPromise;
+function getElements(document) {
   const bannerElement = document.querySelector('#banner');
   const searchInput = document.querySelector('#search');
   const searchForm = document.querySelector('#search_form');
   const resultElement = document.querySelector('#results');
-  const app = new App({ emoji });
+  return { bannerElement, searchInput, searchForm, resultElement };
+}
+
+function useState(initialState) {
+  let state = { ...initialState };
+  function getState() {
+    return state;
+  }
+  function setState(newState) {
+    state = { ...state, ...newState };
+  }
+  return [ getState, setState ];
+}
+
+async function main() {
+  const emoji = await emojiPromise;
+  const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
+
+  const [ getState, setState ] = useState({ topResult: false, emoji });
+  const app = new App(getState, setState);
 
   function onSearchKeyup() {
     render(resultElement, app, {
@@ -61,6 +83,7 @@ async function main() {
   }
 
   function onSubmit() {
+    const { topResult } = getState();
     if (!topResult) return;
     navigator.clipboard.writeText(topResult.emoji);
     bannerElement.innerHTML = `Copied '${topResult.emoji}' to the clipboard`;
