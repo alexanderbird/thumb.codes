@@ -2,6 +2,11 @@
 
 Emoji clipboard: from search term to clipboard without using your mouse
 
+## Contributing
+
+PRs welcome, as long as you don't make it any more keystrokes to get an emoji
+onto the clipboard :)
+
 ## Developer Notes
 
 ### Running locally
