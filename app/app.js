@@ -15,8 +15,8 @@ async function main() {
 
     const bestGuess = results[query.slice(0,-1)] || emoji;
 
-    const queryTerms = query.split(' ');
-    const result = results[query] || bestGuess.filter(x => queryTerms.every(term => x.description.match(term)));
+    const queryTerms = query.toLowerCase().split(' ');
+    const result = results[query] || bestGuess.filter(x => queryTerms.every(term => x.description.toLowerCase().match(term)));
     results[query] = result;
     topResult = result[0];
 
