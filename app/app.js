@@ -3,15 +3,16 @@ const emojiPromise = fetch('/emoji.json').then(r => r.json());
 async function main() {
   const emoji = await emojiPromise;
   const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
-  const [ getState, setState ] = useState({ topResult: false, emoji, offset: 0 });
-  const app = new App(getState, setState);
-  boundOnSearchKeyup = onSearchKeyup.bind(null, resultElement, app, searchInput);
+  const state = { topResult: false, offset: 0 };
+  const setTopResult = topResult => { state.topResult = topResult; };
+  const app = new App({ emoji, setTopResult });
+  boundOnSearchKeyup = () => onSearchKeyup(resultElement, app, searchInput, state.offset);
   boundOnSearchKeyup();
-  const moveDown = () => setState({ offset: getState().offset + 1 })
-  const moveUp = () => setState({ offset: getState().offset - 1 })
+  const moveDown = () => { state.offset += 1; };
+  const moveUp = () => { state.offset -= 1; };
   searchInput.addEventListener('keyup', onArrowKeys.bind(null, moveDown, moveUp));
   searchInput.addEventListener('keyup', boundOnSearchKeyup);
-  searchForm.addEventListener('submit', onSubmit.bind(null, getState, bannerElement));
+  searchForm.addEventListener('submit', () => onSubmit(state.topResult, bannerElement));
 }
 
 document.addEventListener('DOMContentLoaded', main);
@@ -23,15 +24,15 @@ function onArrowKeys(moveDown, moveUp, { key, preventDefault }) {
   }
 }
 
-function onSearchKeyup(resultElement, app, searchInput, event = {}) {
+function onSearchKeyup(resultElement, app, searchInput, offset) {
   render(resultElement, app, {
     maxResults: 50,
-    query: preProcessQuery(searchInput)
+    query: preProcessQuery(searchInput),
+    offset
   });
 }
 
-function onSubmit(getState, bannerElement) {
-  const { topResult } = getState();
+function onSubmit(topResult, bannerElement) {
   if (!topResult) return;
   navigator.clipboard.writeText(topResult.emoji);
   bannerElement.innerHTML = `Copied '${topResult.emoji}' to the clipboard`;
@@ -53,17 +54,16 @@ function getElements(document) {
 }
 
 class App {
-  constructor(getState, setState) {
-    const { emoji } = getState();
-    this.getState = getState;
-    this.setState = setState;
+  constructor({ emoji, setTopResult }) {
+    this.emoji = emoji;
+    this.setTopResult = setTopResult;
     this.results = { '': emoji };
   }
 
-  render({ maxResults, query }) {
+  render({ maxResults, query, offset }) {
     const results = this._getResultsForQueryAndUpdateCache(query);
-    const { topResult, rest } = this._getResultParts(results);
-    this.setState({ topResult });
+    const { topResult, rest } = this._getResultParts(results, offset);
+    this.setTopResult(topResult);
     if (topResult) {
       return `
         <div class='top-result'>
@@ -79,8 +79,7 @@ class App {
     }
   }
 
-  _getResultParts(results) {
-    const { offset } = this.getState();
+  _getResultParts(results, offset) {
     const index = offset % results.length;
     const topResult = results[index];
     const before = index > 0 ? results.slice(0, index) : [];
@@ -90,7 +89,7 @@ class App {
   }
 
   _getResultsForQueryAndUpdateCache(query) {
-    const { emoji } = this.getState();
+    const emoji = this.emoji;
     const bestGuess = this.results[query.slice(0,-1)] || emoji;
     const queryTerms = query.toLowerCase().split(' ');
     const filteredResults = this.results[query]
@@ -100,20 +99,6 @@ class App {
   }
 }
 
-/** rudimentary "Framework" */
-
 function render(element, component, props) {
   element.innerHTML = component.render(props);
 }
-
-function useState(initialState) {
-  let state = { ...initialState };
-  function getState() {
-    return state;
-  }
-  function setState(newState) {
-    state = { ...state, ...newState };
-  }
-  return [ getState, setState ];
-}
-
