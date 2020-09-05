@@ -5,7 +5,7 @@ async function main() {
   const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
   const state = {};
   const setLastQuery = lastQuery => { state.lastQuery = lastQuery; };
-  const app = new App({ emoji });
+  const app = new App({ emoji, maxResults: 50 });
   boundOnSearchKeyup = () => onSearchKeyup(resultElement, app, searchInput, state.lastQuery, setLastQuery);
   searchInput.addEventListener('keyup', boundOnSearchKeyup);
   searchForm.addEventListener('submit', () => onSubmit(getTopResult(), bannerElement));
@@ -65,16 +65,22 @@ function getElements(document) {
 }
 
 class App {
-  constructor({ emoji }) {
+  constructor({ emoji, maxResults }) {
     this.emoji = emoji;
+    this.maxResults = maxResults;
     this.results = { '': emoji };
   }
 
   render({ query }) {
     console.log('render');
-    const results = this._getResultsForQueryAndUpdateCache(query);
+    const allResults = this._getResultsForQueryAndUpdateCache(query);
+    const results = allResults.slice(0, this.maxResults);
+    const hiddenResultCount = allResults.length - results.length;
     if (results.length) {
-      return results.map((result, i) => this._renderResult({ ...result, isChecked: i === 0 })).join('\n');
+      return `
+        ${results.map((result, i) => this._renderResult({ ...result, isChecked: i === 0 })).join('\n')}
+        ${hiddenResultCount > 0 ? `<div>(${hiddenResultCount} other result${hiddenResultCount === 1 ? '' : 's'} omitted)</div>` : ''}
+      `;
     } else {
       return `No results for ${query}`;
     }
