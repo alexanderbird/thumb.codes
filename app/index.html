@@ -23,13 +23,7 @@
 
     <style>
       body {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
         text-align: center;
-        max-width: 600px;
-        margin: 80px auto 0 auto;
-        height: calc(100vh - 120px);
       }
 
       #banner {
@@ -54,6 +48,14 @@
       }
 
       #results {
+        position: fixed;
+        top: 90px;
+        left: 0;
+        right: 0;
+        bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 600px;
         height: calc(100vh - 100px);
         overflow-y: scroll;
         scroll-behavior: smooth;
@@ -61,6 +63,7 @@
 
       #results input[type='radio'] {
         visibility: hidden;
+        position: absolute;
       }
 
       #results input[type='radio'] + label {
@@ -80,10 +83,13 @@
         display: block;
       }
 
-      .footer {
-        margin-top: auto;
-        justify-self: flex-end;
+      #footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
         display: flex;
+        padding: 8px;
         justify-content: space-between;
       }
 
@@ -96,7 +102,7 @@
       <input id='search' autofocus placeholder='thumb'/>
       <div id='results'></div>
     </form>
-    <div class='footer'>
+    <div id='footer'>
       <a href='https://github.com/alexanderbird/thumb.codes'>Open source on Github</a>
       <a href='https://alexanderbird.software'>Created by Alexander Bird</a>
     </div>
