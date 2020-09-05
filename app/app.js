@@ -7,6 +7,8 @@ async function main() {
   const setLastQuery = lastQuery => { state.lastQuery = lastQuery; };
   const app = new App({ emoji, maxResults: 50 });
   boundOnSearchKeyup = () => onSearchKeyup(resultElement, app, searchInput, state.lastQuery, setLastQuery);
+  const initialRender = boundOnSearchKeyup;
+  initialRender();
   searchInput.addEventListener('keyup', boundOnSearchKeyup);
   searchForm.addEventListener('submit', () => onSubmit(getTopResult(), bannerElement));
   document.body.addEventListener('keyup', onArrowKeys.bind(null, moveSelection(getNextSibling), moveSelection(getPreviousSibling)));
