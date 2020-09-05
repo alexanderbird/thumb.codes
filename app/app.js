@@ -3,19 +3,31 @@ const emojiPromise = fetch('/emoji.json').then(r => r.json());
 async function main() {
   const emoji = await emojiPromise;
   const { bannerElement, searchInput, searchForm, resultElement } = getElements(document);
-  const state = { topResult: false, offset: 0 };
-  const setTopResult = topResult => { state.topResult = topResult; };
-  const app = new App({ emoji, setTopResult });
-  boundOnSearchKeyup = () => onSearchKeyup(resultElement, app, searchInput, state.offset);
-  boundOnSearchKeyup();
-  const moveDown = () => { state.offset += 1; };
-  const moveUp = () => { state.offset -= 1; };
-  searchInput.addEventListener('keyup', onArrowKeys.bind(null, moveDown, moveUp));
+  const state = {};
+  const setLastQuery = lastQuery => { state.lastQuery = lastQuery; };
+  const app = new App({ emoji });
+  boundOnSearchKeyup = () => onSearchKeyup(resultElement, app, searchInput, state.lastQuery, setLastQuery);
   searchInput.addEventListener('keyup', boundOnSearchKeyup);
-  searchForm.addEventListener('submit', () => onSubmit(state.topResult, bannerElement));
+  searchForm.addEventListener('submit', () => onSubmit(getTopResult(), bannerElement));
+  document.body.addEventListener('keyup', onArrowKeys.bind(null, moveSelection(getNextSibling), moveSelection(getPreviousSibling)));
+  document.body.addEventListener('click', ({ target }) => target.tagName.toLowerCase() === 'input' && target.type === 'radio' && onSubmit(target.value, bannerElement));
+  document.body.addEventListener('keyup', ({ key }) => key === 'Enter' && onSubmit(getTopResult(), bannerElement));
 }
 
 document.addEventListener('DOMContentLoaded', main);
+
+function moveSelection(getAdjacentSibling) {
+  return function boundMoveSelection() {
+    const newSelection = getAdjacentSibling(document.querySelector("input[type='radio']:checked"), "input[type='radio']");
+    if (!newSelection) return;
+    newSelection.checked = true;
+    document.querySelector(`label[for='${newSelection.value}']`).scrollIntoView();
+  }
+}
+
+function getTopResult() {
+  return document.querySelector("input[type='radio']:checked").value;
+}
 
 function onArrowKeys(moveDown, moveUp, { key, preventDefault }) {
   switch (key) {
@@ -24,18 +36,17 @@ function onArrowKeys(moveDown, moveUp, { key, preventDefault }) {
   }
 }
 
-function onSearchKeyup(resultElement, app, searchInput, offset) {
-  render(resultElement, app, {
-    maxResults: 50,
-    query: preProcessQuery(searchInput),
-    offset
-  });
+function onSearchKeyup(resultElement, app, searchInput, lastQuery, setLastQuery) {
+  const query = preProcessQuery(searchInput);
+  if (query === lastQuery) return;
+  setLastQuery(query);
+  render(resultElement, app, { query });
 }
 
 function onSubmit(topResult, bannerElement) {
   if (!topResult) return;
-  navigator.clipboard.writeText(topResult.emoji);
-  bannerElement.innerHTML = `Copied '${topResult.emoji}' to the clipboard`;
+  navigator.clipboard.writeText(topResult);
+  bannerElement.innerHTML = `Copied '${topResult}' to the clipboard`;
 }
 
 function preProcessQuery(searchInput) {
@@ -54,38 +65,26 @@ function getElements(document) {
 }
 
 class App {
-  constructor({ emoji, setTopResult }) {
+  constructor({ emoji }) {
     this.emoji = emoji;
-    this.setTopResult = setTopResult;
     this.results = { '': emoji };
   }
 
-  render({ maxResults, query, offset }) {
+  render({ query }) {
+    console.log('render');
     const results = this._getResultsForQueryAndUpdateCache(query);
-    const { topResult, rest } = this._getResultParts(results, offset);
-    this.setTopResult(topResult);
-    if (topResult) {
-      return `
-        <div class='top-result'>
-          <h2 class='top-result__result'>${topResult.emoji} ${topResult.description}</h2>
-          <div class='top-result__instructions'>(Enter/Submit to copy)</div>
-        </div>
-
-        ${rest.slice(1, 1 + maxResults).map(({ emoji, description }) => `<div> ${emoji} ${description}</div>`).join('\n')}
-        ${rest.length > (1 + maxResults) ? `<div>(and ${rest.length - 1 - maxResults} more)</div>` : ''}
-      `;
+    if (results.length) {
+      return results.map((result, i) => this._renderResult({ ...result, isChecked: i === 0 })).join('\n');
     } else {
       return `No results for ${query}`;
     }
   }
 
-  _getResultParts(results, offset) {
-    const index = offset % results.length;
-    const topResult = results[index];
-    const before = index > 0 ? results.slice(0, index) : [];
-    const after = results.slice(index + 1, -1);
-    const spacer = { emoji: '&nbsp;', description: '&nbsp;' };
-    return { topResult, rest: [...after, spacer, ...before] };
+  _renderResult({ emoji, description, isChecked }) {
+    return `
+      <input type='radio' name='emoji' value='${emoji}' id='${emoji}' ${ isChecked ? 'checked' : '' }/>
+      <label for='${emoji}' >${emoji} ${description}</label>
+    `;
   }
 
   _getResultsForQueryAndUpdateCache(query) {
@@ -102,3 +101,23 @@ class App {
 function render(element, component, props) {
   element.innerHTML = component.render(props);
 }
+
+// Adapted from https://gomakethings.com/finding-the-next-and-previous-sibling-elements-that-match-a-selector-with-vanilla-js/
+function getPreviousSibling(element, selector) {
+  var sibling = element.previousElementSibling;
+  if (!selector) return sibling;
+  while (sibling) {
+    if (sibling.matches(selector)) return sibling;
+    sibling = sibling.previousElementSibling;
+  }
+}
+
+function getNextSibling(element, selector) {
+  var sibling = element.nextElementSibling;
+  if (!selector) return sibling;
+  while (sibling) {
+    if (sibling.matches(selector)) return sibling;
+    sibling = sibling.nextElementSibling
+  }
+}
+
