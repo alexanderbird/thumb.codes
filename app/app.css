@@ -10,7 +10,7 @@ body {
     'footer';
   grid-template-columns: 1fr;
   grid-template-rows: 30px 60px 1fr 30px;
-  height: 100vh;
+  grid-gap: 10px;
   position: fixed;
   top: 0;
   right: 8px;
@@ -25,6 +25,7 @@ body {
 #search_form {
   grid-area: search;
   position: relative;
+  width: 100%;
 }
 
 #search {
@@ -33,6 +34,12 @@ body {
   width: calc(100% - 16px);
   font-size: 2rem;
   text-align: center;
+}
+
+body.body--ios #search {
+  /* ios hack -- the input overflowed when width: 100% is set
+   * but the width must be set for non-ios. Weird. */
+  width: unset;
 }
 
 #results {
