@@ -1,6 +1,6 @@
 self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(cacheName).then(function(cache) {
+    caches.open('thumb.codes').then(function(cache) {
       return cache.addAll(
         [
           '/app.css',
