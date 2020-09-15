@@ -74,7 +74,6 @@ class App {
   }
 
   render({ query }) {
-    console.log('render');
     const allResults = this._getResultsForQueryAndUpdateCache(query);
     const results = allResults.slice(0, this.maxResults);
     const hiddenResultCount = allResults.length - results.length;
