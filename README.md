@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/fb453a53-0431-4179-89b7-4ebda15c434e/deploy-status)](https://app.netlify.com/sites/thumb-codes/deploys) https://thumb.codes
+
 # Thumb Codes
 
 Emoji clipboard: from search term to clipboard without using your mouse
