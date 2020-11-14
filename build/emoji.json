@@ -16670,5 +16670,9 @@
   {
     "emoji": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
     "description": "flag: Wales"
+  },
+  {
+    "emoji": "—",
+    "description": "unicode: mdash em dash"
   }
 ]

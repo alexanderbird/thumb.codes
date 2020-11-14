@@ -4454,4 +4454,6 @@
 # unqualified : 250
 # component : 9
 
+# additional non-emoji characters
+                                                                 # — E0.0 unicode: mdash em dash
 #EOF
