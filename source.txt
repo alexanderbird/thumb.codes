@@ -203,7 +203,7 @@
 1F90E                                      ; fully-qualified     # 🤎 E12.0 brown heart
 1F5A4                                      ; fully-qualified     # 🖤 E3.0 black heart
 1F90D                                      ; fully-qualified     # 🤍 E12.0 white heart
-1F4AF                                      ; fully-qualified     # 💯 E0.6 hundred points
+1F4AF                                      ; fully-qualified     # 💯 E0.6 hundred points 100
 1F4A2                                      ; fully-qualified     # 💢 E0.6 anger symbol
 1F4A5                                      ; fully-qualified     # 💥 E0.6 collision
 1F4AB                                      ; fully-qualified     # 💫 E0.6 dizzy
