@@ -7,6 +7,7 @@
     "build": "npm-run-all --sequential _build:*",
     "build:precommit": "npm-run-all --sequential _build:clean _build:codes",
     "build:ci": "npm run _build:app",
+    "dev": "run-p start watch",
     "start": "http-server build",
     "watch": "npm-run-all --sequential _before_watch _watch",
     "_before_watch": "npm run build",
