@@ -115,7 +115,8 @@ class App {
     const bestGuess = this.results[query.slice(0,-1)] || emoji;
     const queryTerms = query.toLowerCase().split(' ');
     const filteredResults = this.results[query]
-      || bestGuess.filter(({ description }) => queryTerms.every(term => description.toLowerCase().match(term)));
+      || bestGuess.filter(({ description }) => queryTerms.every(term => description.toLowerCase().match(term)))
+           .sort((lhs, rhs) => lhs.description.length - rhs.description.length);
     this.results[query] = filteredResults;
     return filteredResults
   }
