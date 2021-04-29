@@ -81,10 +81,26 @@ class App {
       return `
         ${results.map((result, i) => this._renderResult({ ...result, isChecked: i === 0 })).join('\n')}
         ${hiddenResultCount > 0 ? `<div>(${hiddenResultCount} other result${hiddenResultCount === 1 ? '' : 's'} omitted)</div>` : ''}
+        ${this._renderMoreResultsLinks(query)}
       `;
     } else {
-      return `No results for ${query}`;
+      return `
+        <div>
+          <div>No results for ${query}</div>
+          ${this._renderMoreResultsLinks(query)}
+        </div>
+      `;
     }
+  }
+
+  _renderMoreResultsLinks(query) {
+    return `
+      <div>
+        <span>More results:</span>
+        <a href="https://emojipedia.org/search/?q=${query}">Emojipedia</a> | 
+        <a href="http://www.amp-what.com/unicode/search/${query}">&amp;what;</a>
+      </div>
+    `;
   }
 
   _renderResult({ emoji, description, isChecked }) {
