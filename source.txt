@@ -4456,4 +4456,5 @@
 
 # additional non-emoji characters
                                                                  # — E0.0 unicode: mdash em dash
+                                                                 # • E0.0 unicode: bullet
 #EOF
